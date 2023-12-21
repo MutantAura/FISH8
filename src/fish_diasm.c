@@ -53,8 +53,8 @@ void FishDiasm(uint8_t* buffer, int pc) {
         case 0xd: printf("%-10s V%01x, V%01x bytes: %01d\n", "DRW", second_nib, third_nib, (int)fourth_nib); break;
         case 0xe: {
             switch (code[1]) {
-                case 0x9E: printf("%-10s V%01x\n", "SKIP.KEYX", second_nib);
-                case 0xA1: printf("%-10s V%01x\n", "SKIPN.KEYX", second_nib);
+                case 0x9E: printf("%-10s V%01x\n", "SKIP.KEYX", second_nib); break;
+                case 0xA1: printf("%-10s V%01x\n", "SKIPN.KEYX", second_nib); break;
                 default: puts("Unknown `e` opcode.");
             }
         } break;
