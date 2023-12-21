@@ -309,8 +309,15 @@ void EmulateCpu(Fish* device) {
                 // These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). Sprites are XORed onto the existing screen. 
                 // If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0. 
                 // If the sprite is positioned so part of it is outside the coordinates of the display, it wraps around to the opposite side of the screen. 
-                uint8_t* sprite_buffer = malloc(sizeof(uint8_t) * instr_nib[3]);
-                memcpy(sprite_buffer, &device->memory[device->i_reg], sizeof(uint8_t) * instr_nib[3]);
+                uint8_t* sprite_buffer = malloc(instr_nib[3]);
+                if (sprite_buffer == NULL) {
+                    puts("Failed to allocate buffer...");
+                    break;
+                }
+
+                // i_reg can get massive for some reason and cause a segfault.
+                // TODO: Debug this.
+                // memcpy(sprite_buffer, &device->memory[device->i_reg], instr_nib[3]);
 
                 // TODO: Draw function?
 
