@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <SDL2/SDL.h>
+#include <stdint.h>
+#include <string.h>
+#include <time.h>
 
 // System constants
 #define MAX_MEMORY 4096
@@ -93,6 +95,8 @@ void EmulateCpu(Fish* device) {
     uint8_t* current_instr;
     uint8_t instr_nib[4];
 
+    srand(time(NULL));
+
     while (!device->exit_requested) {
         // Extract opcode data and break down into nibbles.
         current_instr = &device->memory[device->pc];
@@ -100,6 +104,8 @@ void EmulateCpu(Fish* device) {
         instr_nib[1] = current_instr[0] & 0x0F; 
         instr_nib[2] = current_instr[1] >> 4; 
         instr_nib[3] = current_instr[1] & 0x0F;
+
+        printf("%04x %02x %02x ", device->pc, current_instr[0], current_instr[1]);
 
         // Opcodes from http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#8xy0
         // Some name changes?
@@ -116,7 +122,7 @@ void EmulateCpu(Fish* device) {
 
                 // "Jump to location nnn."
                 // "The interpreter sets the program counter to nnn."
-                device->pc = (instr_nib[1] << 8) | current_instr[1];
+                device->pc = ((uint16_t)instr_nib[1] << 8) | current_instr[1];
             } break;
             case 0x2: {
                 printf("%-10s $%01x%01x%01x\n", "CALL", instr_nib[1], instr_nib[2], instr_nib[3]); 
@@ -125,7 +131,7 @@ void EmulateCpu(Fish* device) {
                 // "The interpreter increments the stack pointer, then puts the current PC on the top of the stack. The PC is then set to nnn."
                 device->sp++;
                 device->stack[device->sp - 1] = device->pc; // Put on stack THEN increment? Documentation unclear...
-                device->pc = (instr_nib[1] << 8) | current_instr[1];
+                device->pc = ((uint16_t)instr_nib[1] << 8) | current_instr[1];
             } break;
             case 0x3: {
                 printf("%-10s V%01x, #$%02x\n", "SKIP.CMP", instr_nib[1], current_instr[1]); 
@@ -157,14 +163,14 @@ void EmulateCpu(Fish* device) {
                 
             } break;
             case 0x6: {
-                printf("%-10s V%01X,#$%02x NOT IMPLEMENTED\n", "MVI", instr_nib[1], current_instr[1]);
+                printf("%-10s V%01X,#$%02x\n", "MVI", instr_nib[1], current_instr[1]);
 
                 // Set Vx = kk.
                 // The interpreter puts the value kk into register Vx.
                 device->v[instr_nib[1]] = current_instr[1];
             } break;
             case 0x7: {
-                printf("%-10s V%01X,#$%02x NOT IMPLEMENTED\n", "ADD", instr_nib[1], current_instr[1]);
+                printf("%-10s V%01X,#$%02x\n", "ADD", instr_nib[1], current_instr[1]);
 
                 // Set Vx = Vx + kk.
                 // Adds the value kk to the value of register Vx, then stores the result in Vx. 
@@ -264,11 +270,53 @@ void EmulateCpu(Fish* device) {
                     default: puts("Unknown `8` opcode."); break;
                 }
             } break;
-            case 0x9: printf("%-10s V%01x, V%01x NOT IMPLEMENTED\n", "SNE", instr_nib[1], instr_nib[2]); break;
-            case 0xa: printf("%-10s I,#$%01x%02x NOT IMPLEMENTED\n", "LDI", instr_nib[1], current_instr[1]); break;
-            case 0xb: printf("%-10s $%01x%02x + V0 NOT IMPLEMENTED\n", "JMP.V", instr_nib[1], current_instr[1]); break;
-            case 0xc: printf("%-10s V%01x, #$%02x NOT IMPLEMENTED\n", "RAND", instr_nib[1], current_instr[1]); break;
-            case 0xd: printf("%-10s V%01x, V%01x bytes: %01d NOT IMPLEMENTED\n", "DRW", instr_nib[1], instr_nib[2], (int)instr_nib[3]); break;
+            case 0x9: {
+                printf("%-10s V%01x, V%01x\n", "SNE", instr_nib[1], instr_nib[2]);
+
+                // Skip next instruction if Vx != Vy.
+                // The values of Vx and Vy are compared, and if they are not equal, the program counter is increased by 2.
+                if (device->v[instr_nib[1]] != device->v[instr_nib[2]]) {
+                    device->pc += 2;
+                }
+            } break;
+            case 0xa: {
+                printf("%-10s I,#$%01x%02x\n", "LDI", instr_nib[1], current_instr[1]);
+
+                // Set I = nnn.
+                // The value of register I is set to nnn.
+                device->i_reg = ((uint16_t)instr_nib[1] << 8) | current_instr[1];
+            } break;
+            case 0xb: {
+                printf("%-10s $%01x%02x + V0\n", "JMP.V", instr_nib[1], current_instr[1]);
+
+                // Jump to location nnn + V0.
+                // The program counter is set to nnn plus the value of V0.
+                device->pc = (((uint16_t)instr_nib[1] << 8) | current_instr[1]) + device->v[0];
+            } break; 
+            case 0xc: {
+                printf("%-10s V%01x, #$%02x\n", "RAND", instr_nib[1], current_instr[1]);
+
+                // Set Vx = random byte AND kk.
+                // The interpreter generates a random number from 0 to 255, which is then ANDed with the value kk. The results are stored in Vx.
+                uint8_t random = (rand() % UINT8_MAX) & current_instr[1];
+                device->v[instr_nib[1]] = random;
+            } break;
+            case 0xd: {
+                printf("%-10s V%01x, V%01x bytes: %01d STUB\n", "DRW", instr_nib[1], instr_nib[2], (int)instr_nib[3]);
+
+                // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
+                // The interpreter reads n bytes from memory, starting at the address stored in I. 
+                // These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). Sprites are XORed onto the existing screen. 
+                // If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0. 
+                // If the sprite is positioned so part of it is outside the coordinates of the display, it wraps around to the opposite side of the screen. 
+                uint8_t* sprite_buffer = malloc(sizeof(uint8_t) * instr_nib[3]);
+                memcpy(sprite_buffer, &device->memory[device->i_reg], sizeof(uint8_t) * instr_nib[3]);
+
+                // TODO: Draw function?
+
+                free(sprite_buffer);
+            } break;
+            // TODO: Implement these after keypad is thought about.
             case 0xe: {
                 switch (current_instr[1]) {
                     case 0x9E: printf("%-10s V%01x NOT IMPLEMENTED\n", "SKIP.KEYX", instr_nib[1]); break;
@@ -278,15 +326,73 @@ void EmulateCpu(Fish* device) {
             } break;
             case 0xf: {
                 switch (current_instr[1]) {
-                    case 0x07: printf("%-10s V%01x, DT NOT IMPLEMENTED\n", "LDX.DT", instr_nib[1]); break;
-                    case 0x0A: printf("%-10s V%01x, KEY NOT IMPLEMENTED\n", "LDX.KEY", instr_nib[1]); break;
-                    case 0x15: printf("%-10s DT, V%01x NOT IMPLEMENTED\n", "LDDT.X", instr_nib[1]); break;
-                    case 0x18: printf("%-10s ST, V%01x NOT IMPLEMENTED\n", "LDST.X", instr_nib[1]); break;
-                    case 0x1E: printf("%-10s I, V%01x NOT IMPLEMENTED\n", "ADDI.X", instr_nib[1]); break;
-                    case 0x29: printf("%-10s I, Sprite: %01x NOT IMPLEMENTED\n", "LDI.FX", instr_nib[1]); break;
-                    case 0x33: printf("%-10s I, (BCD)V%01x NOT IMPLEMENTED\n", "LDB.X", instr_nib[1]); break;
-                    case 0x55: printf("%-10s I, V0 -> V%01x NOT IMPLEMENTED\n", "LDI.ALL", instr_nib[1]); break;
-                    case 0x65: printf("%-10s V0 -> V%01x, I NOT IMPLEMENTED\n", "LDX.ALL", instr_nib[1]); break;
+                    case 0x07: {
+                        printf("%-10s V%01x, DT\n", "LDX.DT", instr_nib[1]);
+
+                        // Set Vx = delay timer value.
+                        // The value of DT is placed into Vx.
+                        device->v[instr_nib[1]] = device->delay_timer;
+                    } break;
+                    case 0x0A:{
+                        printf("%-10s V%01x, KEY NOT IMPLEMENTED\n", "LDX.KEY", instr_nib[1]);
+                        
+                        //TODO: Keypad stuff
+                    } break; 
+                    case 0x15: {
+                        printf("%-10s DT, V%01x\n", "LDDT.X", instr_nib[1]);
+
+                        // Set delay timer = Vx.
+                        // DT is set equal to the value of Vx.
+                        device->delay_timer = device->v[instr_nib[1]];
+                    } break;
+                    case 0x18: {
+                        printf("%-10s ST, V%01x\n", "LDST.X", instr_nib[1]);
+
+                        // Set sound timer = Vx.
+                        // ST is set equal to the value of Vx.
+                        device->sound_timer = device->v[instr_nib[1]];
+                    } break;
+                    case 0x1E: {
+                        printf("%-10s I, V%01x\n", "ADDI.X", instr_nib[1]);
+
+                        // Set I = I + Vx.
+                        // The values of I and Vx are added, and the results are stored in I.
+                        device->i_reg += device->v[instr_nib[1]];
+                    } break;
+                    case 0x29: {
+                        printf("%-10s I, Sprite: %01x NOT IMPLEMENTED\n", "LDI.FX", instr_nib[1]);
+
+                        // Set I = location of sprite for digit Vx.
+                        // The value of I is set to the location for the hexadecimal sprite corresponding to the value of Vx.
+                        // TODO: give each font character a memory location/pointer and make it state accessible.
+                    } break;
+                    case 0x33: {
+                        printf("%-10s I, (BCD)V%01x\n", "LDB.X", instr_nib[1]);
+
+                        // Store BCD representation of Vx in memory locations I, I+1, and I+2.
+                        // The interpreter takes the decimal value of Vx, and places the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2.
+                        device->memory[device->i_reg] = (device->v[instr_nib[1]] / 100);
+                        device->memory[device->i_reg + 1] = (device->v[instr_nib[1]] / 10) % 10;
+                        device->memory[device->i_reg + 2] = device->v[instr_nib[1]] % 10;
+                    } break;
+                    case 0x55: {
+                        printf("%-10s I, V0 -> V%01x\n", "LDI.ALL", instr_nib[1]);
+
+                        // Store registers V0 through Vx in memory starting at location I.
+                        // The interpreter copies the values of registers V0 through Vx into memory, starting at the address in I.
+                        for (int i = 0; i <= instr_nib[1]; i++) {
+                            device->memory[device->i_reg + i] = device->v[i];
+                        }
+                    } break;
+                    case 0x65: {
+                        printf("%-10s V0 -> V%01x, I NOT IMPLEMENTED\n", "LDX.ALL", instr_nib[1]);
+
+                        // Read registers V0 through Vx from memory starting at location I.
+                        // The interpreter reads values from memory starting at location I into registers V0 through Vx.
+                        for (int i = 0; i <= instr_nib[1]; i++) {
+                            device->v[i] = device->memory[device->i_reg + i];
+                        }
+                    } break;
                     default: puts("Unknown `f` opcode."); break;
                 }
             } break;
