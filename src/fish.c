@@ -38,22 +38,7 @@ typedef struct {
 
     // 16 x 8-bit general purpose registers V0-VF.
     // vF specifically can also be used as a "flag" for carry or overflow operations.
-    uint8_t v0;
-    uint8_t v1;
-    uint8_t v2;
-    uint8_t v3;
-    uint8_t v4;
-    uint8_t v5;
-    uint8_t v6;
-    uint8_t v7;
-    uint8_t v8;
-    uint8_t v9;
-    uint8_t vA;
-    uint8_t vB;
-    uint8_t vC;
-    uint8_t vD;
-    uint8_t vE;
-    uint8_t vF;
+    uint8_t v[16];
 
     // CPU exectution speed (instructions per second to execute).
     uint8_t frequency;
@@ -84,6 +69,7 @@ uint8_t font_array[] = {
 void InitFish(Fish* state) {
     state->display = &state->memory[DISPLAY_START];
     state->pc = ROM_START;
+    state->sp = 0;
     state->exit_requested = 0;
 }
 
@@ -120,16 +106,59 @@ void EmulateCpu(Fish* device) {
         switch(instr_nib[0]) {
             case 0x00: {
                 switch (current_instr[1]) {
-                    case 0xE0: printf("%-10s NOT IMPLEMENTED\n", "CLS"); break;
+                    case 0xE0: printf("%-10s NOT IMPLEMENTED\n", "CLS"); break;  // SDL Clear?
                     case 0xEE: printf("%-10s NOT IMPLEMENTED\n", "RET"); break;
-                    default: printf("%-10s $%01x%01x%01x NOT IMPLEMENTED\n", "SYS", instr_nib[1], instr_nib[2], instr_nib[3]);
+                    default: printf("%-10s $%01x%01x%01x\n", "SYS (NOP)", instr_nib[1], instr_nib[2], instr_nib[3]);
                 }
             } break;
-            case 0x1: printf("%-10s $%01x%01x%01x NOT IMPLEMENTED\n", "JMP", instr_nib[1], instr_nib[2], instr_nib[3]); break;
-            case 0x2: printf("%-10s $%01x%01x%01x NOT IMPLEMENTED\n", "CALL", instr_nib[1], instr_nib[2], instr_nib[3]); break;
-            case 0x3: printf("%-10s V%01x, #$%02x NOT IMPLEMENTED\n", "SKIP.CMP", instr_nib[1], current_instr[1]); break;
-            case 0x4: printf("%-10s V%01x, #$%02x NOT IMPLEMENTED\n", "SKIP.NCMP", instr_nib[1], current_instr[1]); break;
-            case 0x5: printf("%-10s V%01x, V%01x NOT IMPLEMENTED\n", "SKIP.RCMP", instr_nib[1], instr_nib[2]); break;
+            case 0x1: {
+                printf("%-10s $%01x%01x%01x\n", "JMP", instr_nib[1], instr_nib[2], instr_nib[3]); 
+                // "Jump to location nnn."
+                // "The interpreter sets the program counter to nnn."
+
+                device->pc = (instr_nib[1] << 8) | current_instr[1];
+                break;
+            }
+            case 0x2: {
+                printf("%-10s $%01x%01x%01x\n", "CALL", instr_nib[1], instr_nib[2], instr_nib[3]); 
+                // "Call subroutine at nnn."
+                // "The interpreter increments the stack pointer, then puts the current PC on the top of the stack. The PC is then set to nnn."
+
+                device->sp++;
+                device->stack[device->sp - 1] = device->pc; // Put on stack THEN increment? Documentation unclear...
+                device->pc = (instr_nib[1] << 8) | current_instr[1];
+                break;
+            }
+            case 0x3: {
+                printf("%-10s V%01x, #$%02x\n", "SKIP.CMP", instr_nib[1], current_instr[1]); 
+                // "Skip next instruction if Vx = kk."
+                // "The interpreter compares register Vx to kk, and if they are equal, increments the program counter by 2."
+
+                if (device->v[instr_nib[1]] == current_instr[1]) {
+                    device->pc += 2;
+                }
+                break;
+            }
+            case 0x4: {
+                printf("%-10s V%01x, #$%02x\n", "SKIP.NCMP", instr_nib[1], current_instr[1]); 
+                // Skip next instruction if Vx != kk.
+                // The interpreter compares register Vx to kk, and if they are not equal, increments the program counter by 2.
+
+                if (device->v[instr_nib[1]] != current_instr[1]) {
+                    device->pc += 2;
+                }
+                break;
+            } 
+            case 0x5: {
+                printf("%-10s V%01x, V%01x\n", "SKIP.RCMP", instr_nib[1], instr_nib[2]); 
+                // Skip next instruction if Vx = Vy.
+                // The interpreter compares register Vx to register Vy, and if they are equal, increments the program counter by 2.
+
+                if (device->v[instr_nib[1]] == device->v[instr_nib[2]]) {
+                    device->pc += 2;
+                }
+                break;
+            }
             case 0x6: printf("%-10s V%01X,#$%02x NOT IMPLEMENTED\n", "MVI", instr_nib[1], current_instr[1]); break;
             case 0x7: printf("%-10s V%01X,#$%02x NOT IMPLEMENTED\n", "ADD", instr_nib[1], current_instr[1]); break;
             case 0x8: {
