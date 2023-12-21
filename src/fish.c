@@ -120,55 +120,55 @@ void EmulateCpu(Fish* device) {
         switch(instr_nib[0]) {
             case 0x00: {
                 switch (current_instr[1]) {
-                    case 0xE0: printf("%-10s\n", "CLS"); break;
-                    case 0xEE: printf("%-10s\n", "RET"); break;
-                    default: printf("%-10s $%01x%01x%01x\n", "SYS", instr_nib[1], instr_nib[2], instr_nib[3]);
+                    case 0xE0: printf("%-10s NOT IMPLEMENTED\n", "CLS"); break;
+                    case 0xEE: printf("%-10s NOT IMPLEMENTED\n", "RET"); break;
+                    default: printf("%-10s $%01x%01x%01x NOT IMPLEMENTED\n", "SYS", instr_nib[1], instr_nib[2], instr_nib[3]);
                 }
             } break;
-            case 0x1: printf("%-10s $%01x%01x%01x\n", "JMP", instr_nib[1], instr_nib[2], instr_nib[3]); break;
-            case 0x2: printf("%-10s $%01x%01x%01x\n", "CALL", instr_nib[1], instr_nib[2], instr_nib[3]); break;
-            case 0x3: printf("%-10s V%01x, #$%02x\n", "SKIP.CMP", instr_nib[1], current_instr[1]); break;
-            case 0x4: printf("%-10s V%01x, #$%02x\n", "SKIP.NCMP", instr_nib[1], current_instr[1]); break;
-            case 0x5: printf("%-10s V%01x, V%01x\n", "SKIP.RCMP", instr_nib[1], instr_nib[2]); break;
-            case 0x6: printf("%-10s V%01X,#$%02x\n", "MVI", instr_nib[1], current_instr[1]); break;
-            case 0x7: printf("%-10s V%01X,#$%02x\n", "ADD", instr_nib[1], current_instr[1]); break;
+            case 0x1: printf("%-10s $%01x%01x%01x NOT IMPLEMENTED\n", "JMP", instr_nib[1], instr_nib[2], instr_nib[3]); break;
+            case 0x2: printf("%-10s $%01x%01x%01x NOT IMPLEMENTED\n", "CALL", instr_nib[1], instr_nib[2], instr_nib[3]); break;
+            case 0x3: printf("%-10s V%01x, #$%02x NOT IMPLEMENTED\n", "SKIP.CMP", instr_nib[1], current_instr[1]); break;
+            case 0x4: printf("%-10s V%01x, #$%02x NOT IMPLEMENTED\n", "SKIP.NCMP", instr_nib[1], current_instr[1]); break;
+            case 0x5: printf("%-10s V%01x, V%01x NOT IMPLEMENTED\n", "SKIP.RCMP", instr_nib[1], instr_nib[2]); break;
+            case 0x6: printf("%-10s V%01X,#$%02x NOT IMPLEMENTED\n", "MVI", instr_nib[1], current_instr[1]); break;
+            case 0x7: printf("%-10s V%01X,#$%02x NOT IMPLEMENTED\n", "ADD", instr_nib[1], current_instr[1]); break;
             case 0x8: {
                 switch (instr_nib[3]) {
-                    case 0x0: printf("%-10s V%01x,V%01x\n", "CPY", instr_nib[1], instr_nib[2]); break;
-                    case 0x1: printf("%-10s V%01x,V%01x\n", "OR", instr_nib[1], instr_nib[2]); break;
-                    case 0x2: printf("%-10s V%01x,V%01x\n", "AND", instr_nib[1], instr_nib[2]); break;
-                    case 0x3: printf("%-10s V%01x,V%01x\n", "XOR", instr_nib[1], instr_nib[2]); break;
-                    case 0x4: printf("%-10s V%01x,V%01x (VF)\n", "ADD", instr_nib[1], instr_nib[2]); break;
-                    case 0x5: printf("%-10s V%01x,V%01x\n", "SUB", instr_nib[1], instr_nib[2]); break;
-                    case 0x6: printf("%-10s V%01x,V%01x (VF)\n", "SHR", instr_nib[1], instr_nib[2]); break;
-                    case 0x7: printf("%-10s V%01x,V%01x (VF)\n", "SUBN", instr_nib[1], instr_nib[2]); break;
-                    case 0xE: printf("%-10s V%01x,V%01x (VF)\n", "SHL", instr_nib[1], instr_nib[2]); break;
+                    case 0x0: printf("%-10s V%01x,V%01x NOT IMPLEMENTED\n", "CPY", instr_nib[1], instr_nib[2]); break;
+                    case 0x1: printf("%-10s V%01x,V%01x NOT IMPLEMENTED\n", "OR", instr_nib[1], instr_nib[2]); break;
+                    case 0x2: printf("%-10s V%01x,V%01x NOT IMPLEMENTED\n", "AND", instr_nib[1], instr_nib[2]); break;
+                    case 0x3: printf("%-10s V%01x,V%01x NOT IMPLEMENTED\n", "XOR", instr_nib[1], instr_nib[2]); break;
+                    case 0x4: printf("%-10s V%01x,V%01x (VF) NOT IMPLEMENTED\n", "ADD", instr_nib[1], instr_nib[2]); break;
+                    case 0x5: printf("%-10s V%01x,V%01x NOT IMPLEMENTED\n", "SUB", instr_nib[1], instr_nib[2]); break;
+                    case 0x6: printf("%-10s V%01x,V%01x (VF) NOT IMPLEMENTED\n", "SHR", instr_nib[1], instr_nib[2]); break;
+                    case 0x7: printf("%-10s V%01x,V%01x (VF) NOT IMPLEMENTED\n", "SUBN", instr_nib[1], instr_nib[2]); break;
+                    case 0xE: printf("%-10s V%01x,V%01x (VF) NOT IMPLEMENTED\n", "SHL", instr_nib[1], instr_nib[2]); break;
                     default: puts("Unknown `8` opcode."); break;
                 }
             } break;
-            case 0x9: printf("%-10s V%01x, V%01x\n", "SNE", instr_nib[1], instr_nib[2]); break;
-            case 0xa: printf("%-10s I,#$%01x%02x\n", "LDI", instr_nib[1], current_instr[1]); break;
-            case 0xb: printf("%-10s $%01x%02x + V0\n", "JMP.V", instr_nib[1], current_instr[1]); break;
-            case 0xc: printf("%-10s V%01x, #$%02x\n", "RAND", instr_nib[1], current_instr[1]); break;
-            case 0xd: printf("%-10s V%01x, V%01x bytes: %01d\n", "DRW", instr_nib[1], instr_nib[2], (int)instr_nib[3]); break;
+            case 0x9: printf("%-10s V%01x, V%01x NOT IMPLEMENTED\n", "SNE", instr_nib[1], instr_nib[2]); break;
+            case 0xa: printf("%-10s I,#$%01x%02x NOT IMPLEMENTED\n", "LDI", instr_nib[1], current_instr[1]); break;
+            case 0xb: printf("%-10s $%01x%02x + V0 NOT IMPLEMENTED\n", "JMP.V", instr_nib[1], current_instr[1]); break;
+            case 0xc: printf("%-10s V%01x, #$%02x NOT IMPLEMENTED\n", "RAND", instr_nib[1], current_instr[1]); break;
+            case 0xd: printf("%-10s V%01x, V%01x bytes: %01d NOT IMPLEMENTED\n", "DRW", instr_nib[1], instr_nib[2], (int)instr_nib[3]); break;
             case 0xe: {
                 switch (current_instr[1]) {
-                    case 0x9E: printf("%-10s V%01x\n", "SKIP.KEYX", instr_nib[1]); break;
-                    case 0xA1: printf("%-10s V%01x\n", "SKIPN.KEYX", instr_nib[1]); break;
+                    case 0x9E: printf("%-10s V%01x NOT IMPLEMENTED\n", "SKIP.KEYX", instr_nib[1]); break;
+                    case 0xA1: printf("%-10s V%01x NOT IMPLEMENTED\n", "SKIPN.KEYX", instr_nib[1]); break;
                     default: puts("Unknown `e` opcode.");
                 }
             } break;
             case 0xf: {
                 switch (current_instr[1]) {
-                    case 0x07: printf("%-10s V%01x, DT\n", "LDX.DT", instr_nib[1]); break;
-                    case 0x0A: printf("%-10s V%01x, KEY\n", "LDX.KEY", instr_nib[1]); break;
-                    case 0x15: printf("%-10s DT, V%01x\n", "LDDT.X", instr_nib[1]); break;
-                    case 0x18: printf("%-10s ST, V%01x\n", "LDST.X", instr_nib[1]); break;
-                    case 0x1E: printf("%-10s I, V%01x\n", "ADDI.X", instr_nib[1]); break;
-                    case 0x29: printf("%-10s I, Sprite: %01x\n", "LDI.FX", instr_nib[1]); break;
-                    case 0x33: printf("%-10s I, (BCD)V%01x\n", "LDB.X", instr_nib[1]); break;
-                    case 0x55: printf("%-10s I, V0 -> V%01x\n", "LDI.ALL", instr_nib[1]); break;
-                    case 0x65: printf("%-10s V0 -> V%01x, I\n", "LDX.ALL", instr_nib[1]); break;
+                    case 0x07: printf("%-10s V%01x, DT NOT IMPLEMENTED\n", "LDX.DT", instr_nib[1]); break;
+                    case 0x0A: printf("%-10s V%01x, KEY NOT IMPLEMENTED\n", "LDX.KEY", instr_nib[1]); break;
+                    case 0x15: printf("%-10s DT, V%01x NOT IMPLEMENTED\n", "LDDT.X", instr_nib[1]); break;
+                    case 0x18: printf("%-10s ST, V%01x NOT IMPLEMENTED\n", "LDST.X", instr_nib[1]); break;
+                    case 0x1E: printf("%-10s I, V%01x NOT IMPLEMENTED\n", "ADDI.X", instr_nib[1]); break;
+                    case 0x29: printf("%-10s I, Sprite: %01x NOT IMPLEMENTED\n", "LDI.FX", instr_nib[1]); break;
+                    case 0x33: printf("%-10s I, (BCD)V%01x NOT IMPLEMENTED\n", "LDB.X", instr_nib[1]); break;
+                    case 0x55: printf("%-10s I, V0 -> V%01x NOT IMPLEMENTED\n", "LDI.ALL", instr_nib[1]); break;
+                    case 0x65: printf("%-10s V0 -> V%01x, I NOT IMPLEMENTED\n", "LDX.ALL", instr_nib[1]); break;
                     default: puts("Unknown `f` opcode."); break;
                 }
             } break;
