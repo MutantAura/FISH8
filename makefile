@@ -6,4 +6,4 @@ all:
 		mkdir build ; \
 	fi
 
-	gcc src/fish.c -o build/fish8 $(CFLAGS) `sdl2-config --cflags --libs`
+	gcc src/fish.c src/cpu.c -o build/fish8 $(CFLAGS) `sdl2-config --cflags --libs`
