@@ -13,11 +13,34 @@ void InputHandler(Fish* fish) {
     SDL_Event event;
     SDL_PollEvent(&event);
 
+    // Reset keypad state each cycle
+    memset(fish->keypad, 0, sizeof(fish->keypad));
+
     switch (event.type) {
         case SDL_QUIT: fish->exit_requested = 1; break;
         case SDL_KEYDOWN: {
-            if (event.key.keysym.sym == SDLK_ESCAPE) {
-                fish->exit_requested = 1;
+            printf("%s", SDL_GetKeyName(event.key.keysym.sym));
+            switch(event.key.keysym.sym) {
+                // General functions
+                case SDLK_ESCAPE: fish->exit_requested = 1; break;
+
+                // Emulated keypad
+                case SDLK_0: fish->keypad[0x0] = 1; break;
+                case SDLK_1: fish->keypad[0x1] = 1; break;
+                case SDLK_2: fish->keypad[0x2] = 1; break;
+                case SDLK_3: fish->keypad[0x3] = 1; break;
+                case SDLK_4: fish->keypad[0x4] = 1; break;
+                case SDLK_5: fish->keypad[0x5] = 1; break;
+                case SDLK_6: fish->keypad[0x6] = 1; break;
+                case SDLK_7: fish->keypad[0x7] = 1; break;
+                case SDLK_8: fish->keypad[0x8] = 1; break;
+                case SDLK_9: fish->keypad[0x9] = 1; break;
+                case SDLK_a: fish->keypad[0xA] = 1; break;
+                case SDLK_b: fish->keypad[0xB] = 1; break;
+                case SDLK_c: fish->keypad[0xC] = 1; break;
+                case SDLK_d: fish->keypad[0xD] = 1; break;
+                case SDLK_e: fish->keypad[0xE] = 1; break;
+                case SDLK_f: fish->keypad[0xF] = 1; break;
             } 
         } break;
     }

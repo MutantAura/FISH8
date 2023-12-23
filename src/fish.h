@@ -44,19 +44,15 @@ typedef struct {
     // vF specifically can also be used as a "flag" for carry or overflow operations.
     uint8_t v[16];
 
+    // 16 x Keys on a keypad (0-F). Represented as an int (bool) array of ON/OFF.
+    uint8_t keypad[16];
+
     // CPU exectution speed (instructions per second to execute).
     uint8_t frequency;
 
     // Kill option
     int exit_requested;
 } Fish;
-
-typedef struct {
-    char* rom_name;
-    int scale;
-    int speed;
-    int fullscreen;
-} CommandArguments;
 
 void InitFish(Fish* state);
 
