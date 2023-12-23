@@ -1,2 +1,2 @@
 # FISH8
-CHIP-8 emulator in C
+CHIP-8 interpreter in C/SDL2.
