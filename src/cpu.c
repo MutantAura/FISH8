@@ -10,7 +10,7 @@ void EmulateCpu(Fish* device) {
     // Seed RNG
     srand(time(NULL));
 
-    int debug_mode = 0;
+    int debug_mode = 1;
 
     // Extract opcode data and break down into nibbles.
     uint8_t* current_instr = &device->memory[device->pc];
@@ -28,8 +28,20 @@ void EmulateCpu(Fish* device) {
     switch(instr_nib[0]) {
         case 0x00: {
             switch (current_instr[1]) {
-                case 0xE0: printf("%-10s NOT IMPLEMENTED\n", "CLS"); break;  // SDL Clear?
-                case 0xEE: printf("%-10s NOT IMPLEMENTED\n", "RET"); break;
+                case 0xE0: {
+                    if (debug_mode) { printf("%-10s\n", "CLS"); }
+
+                    // Clear the display.
+                    ClearScreen();
+                } break;
+                case 0xEE: {
+                    if (debug_mode) { printf("%-10s\n", "RET"); }
+
+                    // Return from a subroutine.
+                    // The interpreter sets the program counter to the address at the top of the stack, then subtracts 1 from the stack pointer.
+                    device->pc = device->stack[device->sp - 1];
+                    device->sp--;
+                } break;
                 default: printf("%-10s $%01x%01x%01x\n", "SYS (NOP)", instr_nib[1], instr_nib[2], instr_nib[3]);
             }
         } break;
@@ -298,11 +310,11 @@ void EmulateCpu(Fish* device) {
                     device->i_reg += device->v[instr_nib[1]];
                 } break;
                 case 0x29: {
-                    if (debug_mode) { printf("%-10s I, Sprite: %01x NOT IMPLEMENTED\n", "LDI.FX", instr_nib[1]); }
+                    if (debug_mode) { printf("%-10s I, Sprite: %01x\n", "LDI.FX", instr_nib[1]); }
 
                     // Set I = location of sprite for digit Vx.
                     // The value of I is set to the location for the hexadecimal sprite corresponding to the value of Vx.
-                    // TODO: give each font character a memory location/pointer and make it state accessible.
+                    device->i_reg = FONT_START + (instr_nib[1] * FONT_STRIDE);
                 } break;
                 case 0x33: {
                     if (debug_mode) { printf("%-10s I, (BCD)V%01x\n", "LDB.X", instr_nib[1]); }
@@ -341,6 +353,7 @@ void EmulateCpu(Fish* device) {
 
     // Serious fuck up catcher.
     if (device->pc > MAX_MEMORY || device->pc < ROM_START) {
+        puts("fuck up detected... exiting...");
         device->exit_requested = 1;
     }
 }

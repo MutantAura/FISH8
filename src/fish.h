@@ -9,8 +9,11 @@
 #define DISPLAY_WIDTH 64
 #define DISPLAY_HEIGHT 32
 
+#define REFRESH_RATE 60
+
 // Memory locations
 #define FONT_START 0x0000
+#define FONT_STRIDE 5
 #define ROM_START 0x0200
 #define DISPLAY_START 0x0F00
 
@@ -57,6 +60,7 @@ typedef struct {
 void InitFish(Fish* state);
 
 int InitSDL();
+void ClearScreen();
 
 int LoadRom(char* file_name, uint8_t* memory);
 

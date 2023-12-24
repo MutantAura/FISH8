@@ -13,13 +13,9 @@ void InputHandler(Fish* fish) {
     SDL_Event event;
     SDL_PollEvent(&event);
 
-    // Reset keypad state each cycle
-    memset(fish->keypad, 0, sizeof(fish->keypad));
-
     switch (event.type) {
         case SDL_QUIT: fish->exit_requested = 1; break;
         case SDL_KEYDOWN: {
-            printf("%s", SDL_GetKeyName(event.key.keysym.sym));
             switch(event.key.keysym.sym) {
                 // General functions
                 case SDLK_ESCAPE: fish->exit_requested = 1; break;
@@ -43,6 +39,27 @@ void InputHandler(Fish* fish) {
                 case SDLK_f: fish->keypad[0xF] = 1; break;
             } 
         } break;
+        case SDL_KEYUP: {
+            switch(event.key.keysym.sym) {
+                // Emulated keypad
+                case SDLK_0: fish->keypad[0x0] = 0; break;
+                case SDLK_1: fish->keypad[0x1] = 0; break;
+                case SDLK_2: fish->keypad[0x2] = 0; break;
+                case SDLK_3: fish->keypad[0x3] = 0; break;
+                case SDLK_4: fish->keypad[0x4] = 0; break;
+                case SDLK_5: fish->keypad[0x5] = 0; break;
+                case SDLK_6: fish->keypad[0x6] = 0; break;
+                case SDLK_7: fish->keypad[0x7] = 0; break;
+                case SDLK_8: fish->keypad[0x8] = 0; break;
+                case SDLK_9: fish->keypad[0x9] = 0; break;
+                case SDLK_a: fish->keypad[0xA] = 0; break;
+                case SDLK_b: fish->keypad[0xB] = 0; break;
+                case SDLK_c: fish->keypad[0xC] = 0; break;
+                case SDLK_d: fish->keypad[0xD] = 0; break;
+                case SDLK_e: fish->keypad[0xE] = 0; break;
+                case SDLK_f: fish->keypad[0xF] = 0; break;
+            } 
+        } break;
     }
 }
 
@@ -51,7 +68,13 @@ void ProcessState() {
 }
 
 void UpdateRenderer() {
+    
+}
 
+void ClearScreen() {
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0 , 255);
+    SDL_RenderClear(renderer);
+    SDL_RenderPresent(renderer);
 }
 
 int main(int argc, char** argv) {
@@ -64,14 +87,14 @@ int main(int argc, char** argv) {
     Fish state = {0};
     InitFish(&state);
 
+    if (!InitSDL()) { return 1; }
+
     // Load ROM file into device memory.
     if (LoadRom(argv[1], &state.memory[ROM_START]) != 0) {
         puts("You are also stupid (file error)");
     }
 
-    if (!InitSDL()) {
-        return 1;
-    }
+    ClearScreen();
 
     // Enter SDL loop?
     while (!state.exit_requested) {
@@ -93,6 +116,7 @@ void InitFish(Fish* state) {
     state->display = &state->memory[DISPLAY_START];
     state->pc = ROM_START;
     state->sp = 0;
+    state->frequency = REFRESH_RATE;
     state->exit_requested = 0;
 
     uint8_t font_array[] = {
