@@ -53,7 +53,10 @@ typedef struct {
     uint8_t frequency;
 
     // Kill option
-    int exit_requested;
+    uint8_t exit_requested;
+
+    // Request redraw
+    uint8_t request_draw;
 } Fish;
 
 void InitFish(Fish* state);

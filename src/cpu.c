@@ -247,6 +247,8 @@ void EmulateCpu(Fish* device) {
                     device->display[y_coord + row][x_coord + col] ^= sprite_bit;
                 }
             }
+
+            device->request_draw = 1;
         } break;
         case 0xe: {
             switch (current_instr[1]) {

@@ -16,6 +16,7 @@ void InputHandler(Fish* fish) {
     switch (event.type) {
         case SDL_QUIT: fish->exit_requested = 1; break;
         case SDL_KEYDOWN: {
+            printf("%s\n", SDL_GetKeyName(event.key.keysym.sym));
             switch(event.key.keysym.sym) {
                 // General functions
                 case SDLK_ESCAPE: fish->exit_requested = 1; break;
@@ -115,7 +116,9 @@ int main(int argc, char** argv) {
     while (!state.exit_requested) {
         InputHandler(&state);
         EmulateCpu(&state);
-        UpdateRenderer(&state);
+        if (state.request_draw) {
+            UpdateRenderer(&state);
+        }
     }
 
     // Cleanup
@@ -165,7 +168,10 @@ int LoadRom(char* file_name, uint8_t* memory) {
     int file_size = ftell(rom);
     fseek(rom, 0L, SEEK_SET);
 
-    fread(memory, file_size, 1, rom);
+    if (fread(memory, file_size, 1, rom) != 1) {
+        return 1;
+    }
+
     fclose(rom);
 
     return 0;
