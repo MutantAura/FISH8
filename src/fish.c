@@ -37,7 +37,7 @@ void InputHandler(Fish* fish) {
                 case SDLK_d: fish->keypad[0xD] = 1; break;
                 case SDLK_e: fish->keypad[0xE] = 1; break;
                 case SDLK_f: fish->keypad[0xF] = 1; break;
-            } 
+            }
         } break;
         case SDL_KEYUP: {
             switch(event.key.keysym.sym) {
@@ -58,7 +58,7 @@ void InputHandler(Fish* fish) {
                 case SDLK_d: fish->keypad[0xD] = 0; break;
                 case SDLK_e: fish->keypad[0xE] = 0; break;
                 case SDLK_f: fish->keypad[0xF] = 0; break;
-            } 
+            }
         } break;
     }
 }
@@ -68,7 +68,7 @@ void ProcessState() {
 }
 
 void UpdateRenderer() {
-    
+
 }
 
 void ClearScreen() {
@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
         puts("you are stupid.");
         return 1;
     }
-    
+
     // Setup device
     Fish state = {0};
     InitFish(&state);

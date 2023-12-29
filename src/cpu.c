@@ -78,7 +78,7 @@ void EmulateCpu(Fish* device) {
             // The interpreter compares register Vx to kk, and if they are not equal, increments the program counter by 2.
             if (device->v[instr_nib[1]] != current_instr[1]) {
                 device->pc += 2;
-            } 
+            }
         } break;
         case 0x5: {
             if (debug_mode) { printf("%-10s V%01x, V%01x\n", "SKIP.RCMP", instr_nib[1], instr_nib[2]); }
@@ -88,7 +88,7 @@ void EmulateCpu(Fish* device) {
             if (device->v[instr_nib[1]] == device->v[instr_nib[2]]) {
                 device->pc += 2;
             }
-            
+
         } break;
         case 0x6: {
             if (debug_mode) { printf("%-10s V%01X,#$%02x\n", "MVI", instr_nib[1], current_instr[1]); }
@@ -101,7 +101,7 @@ void EmulateCpu(Fish* device) {
             if (debug_mode) { printf("%-10s V%01X,#$%02x\n", "ADD", instr_nib[1], current_instr[1]); }
 
             // Set Vx = Vx + kk.
-            // Adds the value kk to the value of register Vx, then stores the result in Vx. 
+            // Adds the value kk to the value of register Vx, then stores the result in Vx.
             device->v[instr_nib[1]] += current_instr[1];
         } break;
         case 0x8: {
@@ -117,15 +117,15 @@ void EmulateCpu(Fish* device) {
                     if (debug_mode) { printf("%-10s V%01x,V%01x\n", "OR", instr_nib[1], instr_nib[2]); }
 
                     // Set Vx = Vx OR Vy.
-                    // Performs a bitwise OR on the values of Vx and Vy, then stores the result in Vx. 
+                    // Performs a bitwise OR on the values of Vx and Vy, then stores the result in Vx.
                     // A bitwise OR compares the corrseponding bits from two values, and if either bit is 1, then the same bit in the result is also 1. Otherwise, it is 0.
-                    device->v[instr_nib[1]] |= device->v[instr_nib[2]]; 
+                    device->v[instr_nib[1]] |= device->v[instr_nib[2]];
                 } break; 
                 case 0x2: {
                     if (debug_mode) { printf("%-10s V%01x,V%01x\n", "AND", instr_nib[1], instr_nib[2]); }
 
                     // Set Vx = Vx AND Vy.
-                    // Performs a bitwise AND on the values of Vx and Vy, then stores the result in Vx. 
+                    // Performs a bitwise AND on the values of Vx and Vy, then stores the result in Vx.
                     // A bitwise AND compares the corrseponding bits from two values, and if both bits are 1, then the same bit in the result is also 1. Otherwise, it is 0.
                     device->v[instr_nib[1]] &= device->v[instr_nib[2]];
                 } break;
@@ -136,7 +136,7 @@ void EmulateCpu(Fish* device) {
                     // Performs a bitwise exclusive OR on the values of Vx and Vy, then stores the result in Vx. 
                     // An exclusive OR compares the corrseponding bits from two values, and if the bits are not both the same, then the corresponding bit in the result is set to 1. Otherwise, it is 0. 
                     device->v[instr_nib[1]] ^= device->v[instr_nib[2]];
-                } break; 
+                } break;
                 case 0x4: {
                     if (debug_mode) { printf("%-10s V%01x,V%01x (VF)\n", "ADD", instr_nib[1], instr_nib[2]); }
 
@@ -148,7 +148,7 @@ void EmulateCpu(Fish* device) {
                         device->v[0xF] = 1;
                     }
                     else device->v[0xF] = 0;
-                    
+
                     device->v[instr_nib[1]] = (uint8_t)(overflow & 0x00FF);
                 } break;
                 case 0x5: {
@@ -186,7 +186,7 @@ void EmulateCpu(Fish* device) {
                 } break;
                 case 0xE: {
                     if (debug_mode) { printf("%-10s V%01x,V%01x (VF)\n", "SHL", instr_nib[1], instr_nib[2]); }
-                    
+
                     // Set Vx = Vx SHL 1.
                     // If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
                     if (((device->v[instr_nib[1]] & 0x80) >> 7) == 1) {
@@ -220,7 +220,7 @@ void EmulateCpu(Fish* device) {
             // Jump to location nnn + V0.
             // The program counter is set to nnn plus the value of V0.
             device->pc = (((uint16_t)instr_nib[1] << 8) | current_instr[1]) + device->v[0];
-        } break; 
+        } break;
         case 0xc: {
             if (debug_mode) { printf("%-10s V%01x, #$%02x\n", "RAND", instr_nib[1], current_instr[1]); }
 
@@ -233,9 +233,9 @@ void EmulateCpu(Fish* device) {
             if (debug_mode) { printf("%-10s V%01x, V%01x bytes: %01d STUB\n", "DRW", instr_nib[1], instr_nib[2], (int)instr_nib[3]); }
 
             // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
-            // The interpreter reads n bytes from memory, starting at the address stored in I. 
+            // The interpreter reads n bytes from memory, starting at the address stored in I.
             // These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). Sprites are XORed onto the existing screen. 
-            // If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0. 
+            // If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0.
             // If the sprite is positioned so part of it is outside the coordinates of the display, it wraps around to the opposite side of the screen. 
             uint8_t* sprite_buffer = malloc(instr_nib[3]);
             if (sprite_buffer == NULL) {
@@ -255,7 +255,7 @@ void EmulateCpu(Fish* device) {
             switch (current_instr[1]) {
                 case 0x9E: {
                     if (debug_mode) { printf("%-10s V%01x\n", "SKIP.KEYX", instr_nib[1]); }
-                    
+
                     // Skip next instruction if key with the value of Vx is pressed.
                     // Checks the keyboard, and if the key corresponding to the value of Vx is currently in the down position, PC is increased by 2.
                     if (device->keypad[instr_nib[1]]) {
@@ -285,7 +285,7 @@ void EmulateCpu(Fish* device) {
                 } break;
                 case 0x0A:{
                     if (debug_mode) { printf("%-10s V%01x, KEY NOT IMPLEMENTED\n", "LDX.KEY", instr_nib[1]); }
-                    
+
                     //TODO: Keypad stuff
                 } break; 
                 case 0x15: {
@@ -347,7 +347,7 @@ void EmulateCpu(Fish* device) {
             }
         } break;
     }
-        
+
     // Increment PC by 2 after each instruction call.
     device->pc += 2;
 

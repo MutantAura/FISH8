@@ -7,3 +7,7 @@ all:
 	fi
 
 	gcc src/fish.c src/cpu.c -o build/fish8 $(CFLAGS) `pkg-config --cflags --libs sdl2`
+
+clean:
+	rm -rf build/
+	make all
