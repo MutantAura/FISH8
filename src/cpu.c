@@ -32,7 +32,7 @@ void EmulateCpu(Fish* device) {
                     if (debug_mode) { printf("%-10s\n", "CLS"); }
 
                     // Clear the display.
-                    ClearScreen();
+                    memset(device->display, 0, sizeof(device->display));
                 } break;
                 case 0xEE: {
                     if (debug_mode) { printf("%-10s\n", "RET"); }
@@ -234,22 +234,24 @@ void EmulateCpu(Fish* device) {
 
             // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
             // The interpreter reads n bytes from memory, starting at the address stored in I.
-            // These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). Sprites are XORed onto the existing screen. 
+            // These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). Sprites are XORed onto the existing screen.
             // If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0.
             // If the sprite is positioned so part of it is outside the coordinates of the display, it wraps around to the opposite side of the screen. 
-            uint8_t* sprite_buffer = malloc(instr_nib[3]);
-            if (sprite_buffer == NULL) {
-                puts("Failed to allocate buffer...");
-                break;
+            uint8_t x_coord = device->v[instr_nib[1]];
+            uint8_t y_coord = device->v[instr_nib[2]];
+
+            // Loop over each row from Y -> Y + sprite height.
+            for (int row = 0; row < instr_nib[3]; row++) {
+                // Loop over each bit of the row byte (8 bits).
+                for (int col = 0; col < 8; col++) {
+                    int sprite_bit = (device->memory[device->i_reg + row] >> (7 - col)) & 0x1;
+
+                    if (sprite_bit && device->display[y_coord + row][x_coord + col]) {
+                        device->v[0xF] = 1;
+                    }
+                    device->display[y_coord + row][x_coord + col] ^= sprite_bit;
+                }
             }
-
-            // i_reg can get massive for some reason and cause a segfault.
-            // TODO: Debug this.
-            // memcpy(sprite_buffer, &device->memory[device->i_reg], instr_nib[3]);
-
-            // TODO: Draw function?
-
-            free(sprite_buffer);
         } break;
         case 0xe: {
             switch (current_instr[1]) {

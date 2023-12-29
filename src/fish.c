@@ -92,6 +92,7 @@ int main(int argc, char** argv) {
     // Load ROM file into device memory.
     if (LoadRom(argv[1], &state.memory[ROM_START]) != 0) {
         puts("You are also stupid (file error)");
+        return 1;
     }
 
     ClearScreen();
@@ -113,7 +114,7 @@ int main(int argc, char** argv) {
 }
 
 void InitFish(Fish* state) {
-    state->display = &state->memory[DISPLAY_START];
+    memset(state->display, 0, sizeof(state->display));
     state->pc = ROM_START;
     state->sp = 0;
     state->frequency = REFRESH_RATE;

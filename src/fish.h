@@ -15,15 +15,13 @@
 #define FONT_START 0x0000
 #define FONT_STRIDE 5
 #define ROM_START 0x0200
-#define DISPLAY_START 0x0F00
 
 typedef struct {
     // 4Kb of main system memory organised in a byte array.
     uint8_t memory[MAX_MEMORY];
 
-    // Visual display of 64x32 resolution (monochrome). Display is located at 0xF00 of memory.
-    // TODO: Replace with "Pixel" type?
-    uint8_t* display;
+    // Visual display of 64x32 resolution (monochrome).
+    uint8_t display[DISPLAY_HEIGHT][DISPLAY_WIDTH];
 
     // Program counter is a pointer to the current instruction to execute.
     uint16_t pc;
