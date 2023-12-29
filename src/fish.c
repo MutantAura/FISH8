@@ -63,16 +63,32 @@ void InputHandler(Fish* fish) {
     }
 }
 
-void ProcessState() {
+void UpdateRenderer(Fish* state) {
+    ClearScreen();
 
-}
+    SDL_Rect fish_display[DISPLAY_HEIGHT][DISPLAY_WIDTH];
+    SDL_Rect temp;
+    uint8_t display_bit;
 
-void UpdateRenderer() {
+    for (int i = 0; i < DISPLAY_HEIGHT; i++) {
+        for (int j = 0; j < DISPLAY_WIDTH; j++) {
+            display_bit = state->display[i][j];
+            temp.x = j * DISPLAY_SCALE;
+            temp.y = i * DISPLAY_SCALE;
+            temp.w = display_bit * DISPLAY_SCALE;
+            temp.h = display_bit * DISPLAY_SCALE;
 
+            fish_display[i][j] = temp;
+        }
+    }
+
+    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    SDL_RenderFillRects(renderer, &fish_display[0][0], DISPLAY_HEIGHT * DISPLAY_WIDTH);
+    SDL_RenderPresent(renderer);
 }
 
 void ClearScreen() {
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0 , 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
     SDL_RenderClear(renderer);
     SDL_RenderPresent(renderer);
 }
@@ -101,8 +117,7 @@ int main(int argc, char** argv) {
     while (!state.exit_requested) {
         InputHandler(&state);
         EmulateCpu(&state);
-        ProcessState();
-        UpdateRenderer();
+        UpdateRenderer(&state);
     }
 
     // Cleanup
@@ -166,7 +181,7 @@ int InitSDL() {
 
     window = SDL_CreateWindow("Fish8 - 0.0.1", 
                              SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
-                             DISPLAY_WIDTH * 10, DISPLAY_HEIGHT * 10, 
+                             DISPLAY_WIDTH * DISPLAY_SCALE, DISPLAY_HEIGHT * DISPLAY_SCALE, 
                              0);
     if (window == NULL) {
         puts("Failed to create an SDL window...");
