@@ -10,7 +10,7 @@ void EmulateCpu(Fish* device) {
     // Seed RNG
     srand(time(NULL));
 
-    int debug_mode = 1;
+    int debug_mode = 0;
 
     // Extract opcode data and break down into nibbles.
     uint8_t* current_instr = &device->memory[device->pc];
@@ -39,8 +39,8 @@ void EmulateCpu(Fish* device) {
 
                     // Return from a subroutine.
                     // The interpreter sets the program counter to the address at the top of the stack, then subtracts 1 from the stack pointer.
-                    device->pc = device->stack[device->sp - 1];
                     device->sp--;
+                    device->pc = device->stack[device->sp];
                 } break;
                 default: printf("%-10s $%01x%01x%01x\n", "SYS (NOP)", instr_nib[1], instr_nib[2], instr_nib[3]);
             }
@@ -50,16 +50,18 @@ void EmulateCpu(Fish* device) {
 
             // "Jump to location nnn."
             // "The interpreter sets the program counter to nnn."
-            device->pc = ((uint16_t)instr_nib[1] << 8) | current_instr[1];
+            device->pc = (instr_nib[1] << 8) | current_instr[1];
+            device->pc -= 2;
         } break;
         case 0x2: {
             if (debug_mode) { printf("%-10s $%01x%01x%01x\n", "CALL", instr_nib[1], instr_nib[2], instr_nib[3]); }
 
             // "Call subroutine at nnn."
-            // "The interpreter increments the stack pointer, then puts the current PC on the top of the stack. The PC is then set to nnn."
+            // "The interpreter increments the stack pointer, then puts the current PC on the top of the stack. The PC is then set to nnn."  
+            device->stack[device->sp] = device->pc;
             device->sp++;
-            device->stack[device->sp - 1] = device->pc; // Put on stack THEN increment? Documentation unclear...
-            device->pc = ((uint16_t)instr_nib[1] << 8) | current_instr[1];
+            device->pc = (instr_nib[1] << 8) | current_instr[1];
+            device->pc -= 2;
         } break;
         case 0x3: {
             if (debug_mode) { printf("%-10s V%01x, #$%02x\n", "SKIP.CMP", instr_nib[1], current_instr[1]); }
@@ -144,11 +146,7 @@ void EmulateCpu(Fish* device) {
                     //The values of Vx and Vy are added together. If the result is greater than 8 bits (i.e., > 255,) VF is set to 1, otherwise 0. 
                     // Only the lowest 8 bits of the result are kept, and stored in Vx.
                     uint16_t overflow = device->v[instr_nib[1]] + device->v[instr_nib[2]];
-                    if (overflow > UINT8_MAX) {
-                        device->v[0xF] = 1;
-                    }
-                    else device->v[0xF] = 0;
-
+                    device->v[0xF] = overflow > UINT8_MAX;
                     device->v[instr_nib[1]] = (uint8_t)(overflow & 0x00FF);
                 } break;
                 case 0x5: {
@@ -156,10 +154,7 @@ void EmulateCpu(Fish* device) {
 
                     // Set Vx = Vx - Vy, set VF = NOT borrow.
                     // If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx, and the results stored in Vx.
-                    if (device->v[instr_nib[1]] > device->v[instr_nib[2]]) {
-                        device->v[0xF] = 1;
-                    } else device->v[0xF] = 0;
-
+                    device->v[0xF] = device->v[instr_nib[1]] > device->v[instr_nib[2]];
                     device->v[instr_nib[1]] -= device->v[instr_nib[2]];
                 } break;
                 case 0x6: {
@@ -212,14 +207,14 @@ void EmulateCpu(Fish* device) {
 
             // Set I = nnn.
             // The value of register I is set to nnn.
-            device->i_reg = ((uint16_t)instr_nib[1] << 8) | current_instr[1];
+            device->i_reg = (instr_nib[1] << 8) | current_instr[1];
         } break;
         case 0xb: {
             if (debug_mode) { printf("%-10s $%01x%02x + V0\n", "JMP.V", instr_nib[1], current_instr[1]); }
 
             // Jump to location nnn + V0.
             // The program counter is set to nnn plus the value of V0.
-            device->pc = (((uint16_t)instr_nib[1] << 8) | current_instr[1]) + device->v[0];
+            device->pc = ((instr_nib[1] << 8) | current_instr[1]) + device->v[0];
         } break;
         case 0xc: {
             if (debug_mode) { printf("%-10s V%01x, #$%02x\n", "RAND", instr_nib[1], current_instr[1]); }
@@ -248,7 +243,7 @@ void EmulateCpu(Fish* device) {
 
                     if (sprite_bit && device->display[y_coord + row][x_coord + col]) {
                         device->v[0xF] = 1;
-                    }
+                    } else device->v[0xF] = 0;
                     device->display[y_coord + row][x_coord + col] ^= sprite_bit;
                 }
             }

@@ -10,7 +10,7 @@
 #define DISPLAY_HEIGHT 32
 
 #define REFRESH_RATE 60
-#define DISPLAY_SCALE 10
+#define DISPLAY_SCALE 20
 
 // Memory locations
 #define FONT_START 0x0000

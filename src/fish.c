@@ -64,8 +64,6 @@ void InputHandler(Fish* fish) {
 }
 
 void UpdateRenderer(Fish* state) {
-    ClearScreen();
-
     SDL_Rect fish_display[DISPLAY_HEIGHT][DISPLAY_WIDTH];
     SDL_Rect temp;
     uint8_t display_bit;
