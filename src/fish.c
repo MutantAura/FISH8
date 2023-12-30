@@ -73,19 +73,14 @@ void UpdateRenderer(Fish* state) {
 
     for (int i = 0; i < DISPLAY_HEIGHT; i++) {
         for (int j = 0; j < DISPLAY_WIDTH; j++) {
-            display_bit = state->display[i][j];
+            display_bit = state->display[i][j] * UINT8_MAX;
 
             temp.x = j * DISPLAY_SCALE;
             temp.y = i * DISPLAY_SCALE;
             temp.w = DISPLAY_SCALE;
             temp.h = DISPLAY_SCALE;
-
-            if (display_bit) {
-                SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-            } else {
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
-            }
-
+                
+            SDL_SetRenderDrawColor(renderer, display_bit, display_bit, display_bit, 0xFF);
             SDL_RenderFillRect(renderer, &temp);
         }
     }
