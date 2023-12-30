@@ -67,25 +67,28 @@ void InputHandler(Fish* fish) {
 void UpdateRenderer(Fish* state) {
     state->request_draw = 0;
     ClearScreen();
-    
-    SDL_Rect fish_display[DISPLAY_HEIGHT][DISPLAY_WIDTH];
+
     SDL_Rect temp;
     uint8_t display_bit;
 
     for (int i = 0; i < DISPLAY_HEIGHT; i++) {
         for (int j = 0; j < DISPLAY_WIDTH; j++) {
             display_bit = state->display[i][j];
+
             temp.x = j * DISPLAY_SCALE;
             temp.y = i * DISPLAY_SCALE;
-            temp.w = display_bit * DISPLAY_SCALE;
-            temp.h = display_bit * DISPLAY_SCALE;
+            temp.w = DISPLAY_SCALE;
+            temp.h = DISPLAY_SCALE;
 
-            fish_display[i][j] = temp;
+            if (display_bit) {
+                SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+            } else {
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
+            }
+
+            SDL_RenderFillRect(renderer, &temp);
         }
     }
-
-    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    SDL_RenderFillRects(renderer, &fish_display[0][0], DISPLAY_HEIGHT * DISPLAY_WIDTH);
     SDL_RenderPresent(renderer);
 }
 

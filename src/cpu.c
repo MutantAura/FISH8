@@ -32,7 +32,7 @@ void EmulateCpu(Fish* device) {
                     if (debug_mode) { printf("%-10s\n", "CLS"); }
 
                     // Clear the display.
-                    memset(device->display, 0, sizeof(device->display));
+                    memset(&device->display[0][0], 0, sizeof(device->display));
                 } break;
                 case 0xEE: {
                     if (debug_mode) { printf("%-10s\n", "RET"); }
