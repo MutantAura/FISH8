@@ -283,9 +283,12 @@ void EmulateCpu(Fish* device) {
                     device->v[instr_nib[1]] = device->delay_timer;
                 } break;
                 case 0x0A:{
-                    if (debug_mode) { printf("%-10s V%01x, KEY NOT IMPLEMENTED\n", "LDX.KEY", instr_nib[1]); }
+                    if (debug_mode) { printf("%-10s V%01x\n", "LDX.KEY", instr_nib[1]); }
 
-                    //TODO: Keypad stuff
+                    // Wait for a key press, store the value of the key in Vx.
+                    // All execution stops until a key is pressed, then the value of that key is stored in Vx.
+
+                    device->pc -= 2;
                 } break; 
                 case 0x15: {
                     if (debug_mode) { printf("%-10s DT, V%01x\n", "LDDT.X", instr_nib[1]); }

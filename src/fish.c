@@ -8,60 +8,71 @@
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
+const uint8_t* keyboard_state = NULL;
 
 void InputHandler(Fish* fish) {
     SDL_Event event;
     SDL_PollEvent(&event);
+    SDL_PumpEvents();
 
-    switch (event.type) {
-        case SDL_QUIT: fish->exit_requested = 1; break;
-        case SDL_KEYDOWN: {
-            printf("%s\n", SDL_GetKeyName(event.key.keysym.sym));
-            switch(event.key.keysym.sym) {
-                // General functions
-                case SDLK_ESCAPE: fish->exit_requested = 1; break;
-
-                // Emulated keypad
-                case SDLK_0: fish->keypad[0x0] = 1; break;
-                case SDLK_1: fish->keypad[0x1] = 1; break;
-                case SDLK_2: fish->keypad[0x2] = 1; break;
-                case SDLK_3: fish->keypad[0x3] = 1; break;
-                case SDLK_4: fish->keypad[0x4] = 1; break;
-                case SDLK_5: fish->keypad[0x5] = 1; break;
-                case SDLK_6: fish->keypad[0x6] = 1; break;
-                case SDLK_7: fish->keypad[0x7] = 1; break;
-                case SDLK_8: fish->keypad[0x8] = 1; break;
-                case SDLK_9: fish->keypad[0x9] = 1; break;
-                case SDLK_a: fish->keypad[0xA] = 1; break;
-                case SDLK_b: fish->keypad[0xB] = 1; break;
-                case SDLK_c: fish->keypad[0xC] = 1; break;
-                case SDLK_d: fish->keypad[0xD] = 1; break;
-                case SDLK_e: fish->keypad[0xE] = 1; break;
-                case SDLK_f: fish->keypad[0xF] = 1; break;
-            }
-        } break;
-        case SDL_KEYUP: {
-            switch(event.key.keysym.sym) {
-                // Emulated keypad
-                case SDLK_0: fish->keypad[0x0] = 0; break;
-                case SDLK_1: fish->keypad[0x1] = 0; break;
-                case SDLK_2: fish->keypad[0x2] = 0; break;
-                case SDLK_3: fish->keypad[0x3] = 0; break;
-                case SDLK_4: fish->keypad[0x4] = 0; break;
-                case SDLK_5: fish->keypad[0x5] = 0; break;
-                case SDLK_6: fish->keypad[0x6] = 0; break;
-                case SDLK_7: fish->keypad[0x7] = 0; break;
-                case SDLK_8: fish->keypad[0x8] = 0; break;
-                case SDLK_9: fish->keypad[0x9] = 0; break;
-                case SDLK_a: fish->keypad[0xA] = 0; break;
-                case SDLK_b: fish->keypad[0xB] = 0; break;
-                case SDLK_c: fish->keypad[0xC] = 0; break;
-                case SDLK_d: fish->keypad[0xD] = 0; break;
-                case SDLK_e: fish->keypad[0xE] = 0; break;
-                case SDLK_f: fish->keypad[0xF] = 0; break;
-            }
-        } break;
+    if (event.type == SDL_QUIT) {
+        fish->exit_requested = 1;
     }
+    else {
+        if (keyboard_state[SDL_SCANCODE_0]) {
+            fish->keypad[0x0] = 1;
+        } else fish->keypad[0x0] = 0;
+        if (keyboard_state[SDL_SCANCODE_1]) {
+            fish->keypad[0x1] = 1;
+        } else fish->keypad[0x1] = 0;
+        if (keyboard_state[SDL_SCANCODE_2]) {
+            fish->keypad[0x2] = 1;
+        } else fish->keypad[0x2] = 0;
+        if (keyboard_state[SDL_SCANCODE_3]) {
+            fish->keypad[0x3] = 1;
+        } else fish->keypad[0x3] = 0;
+        if (keyboard_state[SDL_SCANCODE_3]) {
+            fish->keypad[0x4] = 1;
+        } else fish->keypad[0x4] = 0;
+        if (keyboard_state[SDL_SCANCODE_5]) {
+            fish->keypad[0x5] = 1;
+        } else fish->keypad[0x5] = 0;
+        if (keyboard_state[SDL_SCANCODE_6]) {
+            fish->keypad[0x6] = 1;
+        } else fish->keypad[0x6] = 0;
+        if (keyboard_state[SDL_SCANCODE_7]) {
+            fish->keypad[0x7] = 1;
+        } else fish->keypad[0x7] = 0;
+        if (keyboard_state[SDL_SCANCODE_8]) {
+            fish->keypad[0x8] = 1;
+        } else fish->keypad[0x8] = 0;
+        if (keyboard_state[SDL_SCANCODE_9]) {
+            fish->keypad[0x9] = 1;
+        } else fish->keypad[0x9] = 0;
+        if (keyboard_state[SDL_SCANCODE_A]) {
+            fish->keypad[0xA] = 1;
+        } else fish->keypad[0xA] = 0;
+        if (keyboard_state[SDL_SCANCODE_B]) {
+            fish->keypad[0xB] = 1;
+        } else fish->keypad[0xB] = 0;
+        if (keyboard_state[SDL_SCANCODE_C]) {
+            fish->keypad[0xC] = 1;
+        } else fish->keypad[0xC] = 0;
+        if (keyboard_state[SDL_SCANCODE_D]) {
+            fish->keypad[0xD] = 1;
+        } else fish->keypad[0xD] = 0;
+        if (keyboard_state[SDL_SCANCODE_E]) {
+            fish->keypad[0xE] = 1;
+        } else fish->keypad[0xE] = 0;
+        if (keyboard_state[SDL_SCANCODE_F]) {
+            fish->keypad[0xF] = 1;
+        } else fish->keypad[0xF] = 0;
+    }
+
+    for (int i = 0; i < 16; i++) {
+        printf("%d", fish->keypad[i]);
+    }
+    printf("\n");
 }
 
 void UpdateRenderer(Fish* state) {
@@ -73,6 +84,8 @@ void UpdateRenderer(Fish* state) {
 
     for (int i = 0; i < DISPLAY_HEIGHT; i++) {
         for (int j = 0; j < DISPLAY_WIDTH; j++) {
+            // If display_bit = 0, drawing colour = black.
+            // If display_bit = 1, drawing colour = white.
             display_bit = state->display[i][j] * UINT8_MAX;
 
             temp.x = j * DISPLAY_SCALE;
@@ -198,6 +211,8 @@ int InitSDL() {
         puts("Failed to create SDL renderer...");
         return 0;
     }
+
+    keyboard_state = SDL_GetKeyboardState(NULL);
 
     return 1;
 }
