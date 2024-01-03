@@ -9,16 +9,19 @@
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 const uint8_t* keyboard_state = NULL;
+int last_frame_ticks = 0;
 
 void InputHandler(Fish* fish) {
     SDL_Event event;
     SDL_PollEvent(&event);
-    SDL_PumpEvents();
-
+    
     if (event.type == SDL_QUIT) {
         fish->exit_requested = 1;
     }
     else {
+        if (keyboard_state[SDL_SCANCODE_ESCAPE]) {
+            fish->exit_requested = 1;
+        }
         if (keyboard_state[SDL_SCANCODE_0]) {
             fish->keypad[0x0] = 1;
         } else fish->keypad[0x0] = 0;
@@ -31,7 +34,7 @@ void InputHandler(Fish* fish) {
         if (keyboard_state[SDL_SCANCODE_3]) {
             fish->keypad[0x3] = 1;
         } else fish->keypad[0x3] = 0;
-        if (keyboard_state[SDL_SCANCODE_3]) {
+        if (keyboard_state[SDL_SCANCODE_4]) {
             fish->keypad[0x4] = 1;
         } else fish->keypad[0x4] = 0;
         if (keyboard_state[SDL_SCANCODE_5]) {
@@ -69,16 +72,13 @@ void InputHandler(Fish* fish) {
         } else fish->keypad[0xF] = 0;
     }
 
-    for (int i = 0; i < 16; i++) {
+    /* for (int i = 0; i < 16; i++) {
         printf("%d", fish->keypad[i]);
     }
-    printf("\n");
+    printf("\n"); */
 }
 
 void UpdateRenderer(Fish* state) {
-    state->request_draw = 0;
-    ClearScreen();
-
     SDL_Rect temp;
     uint8_t display_bit;
 
@@ -128,10 +128,20 @@ int main(int argc, char** argv) {
 
     // Enter SDL loop?
     while (!state.exit_requested) {
+        last_frame_ticks = SDL_GetTicks();
+
         InputHandler(&state);
-        EmulateCpu(&state);
-        if (state.request_draw) {
-            UpdateRenderer(&state);
+        
+        // Assume each cycle = 1 instruction.
+        for (int i = 0; i < state.frequency; i++) {
+            EmulateCpu(&state);
+        }
+
+        UpdateRenderer(&state);
+
+        int render_cost = SDL_GetTicks() - last_frame_ticks;
+        if (render_cost < (1000/REFRESH_RATE)) {
+            SDL_Delay((1000/REFRESH_RATE) - render_cost);
         }
     }
 
@@ -147,7 +157,7 @@ void InitFish(Fish* state) {
     memset(state->display, 0, sizeof(state->display));
     state->pc = ROM_START;
     state->sp = 0;
-    state->frequency = REFRESH_RATE;
+    state->frequency = 500;
     state->exit_requested = 0;
 
     uint8_t font_array[] = {
@@ -206,13 +216,15 @@ int InitSDL() {
         return 0;
     }
 
-    renderer = SDL_CreateRenderer(window, -1, 0);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == NULL) {
         puts("Failed to create SDL renderer...");
         return 0;
     }
 
     keyboard_state = SDL_GetKeyboardState(NULL);
+
+    last_frame_ticks = SDL_GetTicks();
 
     return 1;
 }

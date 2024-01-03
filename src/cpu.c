@@ -225,7 +225,7 @@ void EmulateCpu(Fish* device) {
             device->v[instr_nib[1]] = random;
         } break;
         case 0xd: {
-            if (debug_mode) { printf("%-10s V%01x, V%01x bytes: %01d STUB\n", "DRW", instr_nib[1], instr_nib[2], (int)instr_nib[3]); }
+            if (debug_mode) { printf("%-10s V%01x, V%01x bytes: %01d\n", "DRW", instr_nib[1], instr_nib[2], (int)instr_nib[3]); }
 
             // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
             // The interpreter reads n bytes from memory, starting at the address stored in I.
@@ -247,8 +247,6 @@ void EmulateCpu(Fish* device) {
                     device->display[y_coord + row][x_coord + col] ^= sprite_bit;
                 }
             }
-
-            device->request_draw = 1;
         } break;
         case 0xe: {
             switch (current_instr[1]) {
@@ -257,7 +255,7 @@ void EmulateCpu(Fish* device) {
 
                     // Skip next instruction if key with the value of Vx is pressed.
                     // Checks the keyboard, and if the key corresponding to the value of Vx is currently in the down position, PC is increased by 2.
-                    if (device->keypad[instr_nib[1]]) {
+                    if (device->keypad[device->v[instr_nib[1]]]) {
                         device->pc += 2;
                     }
                 } break;
@@ -266,7 +264,7 @@ void EmulateCpu(Fish* device) {
 
                     // Skip next instruction if key with the value of Vx is not pressed.
                     // Checks the keyboard, and if the key corresponding to the value of Vx is currently in the up position, PC is increased by 2.
-                    if (!device->keypad[instr_nib[1]]) {
+                    if (!device->keypad[device->v[instr_nib[1]]]) {
                         device->pc += 2;
                     }
                 } break;
@@ -287,7 +285,14 @@ void EmulateCpu(Fish* device) {
 
                     // Wait for a key press, store the value of the key in Vx.
                     // All execution stops until a key is pressed, then the value of that key is stored in Vx.
-
+                    for (uint8_t i = 0; i < sizeof(device->keypad); i++) {
+                        if (device->keypad[i] == 0 && device->keypad_buffer[i] == 1) {
+                            device->v[instr_nib[1]] = i;
+                            device->pc += 2;
+                            break;
+                        }
+                    }
+                    memcpy(&device->keypad_buffer[0], &device->keypad[0], sizeof(device->keypad));
                     device->pc -= 2;
                 } break; 
                 case 0x15: {
@@ -337,7 +342,7 @@ void EmulateCpu(Fish* device) {
                     }
                 } break;
                 case 0x65: {
-                    if (debug_mode) { printf("%-10s V0 -> V%01x, I NOT IMPLEMENTED\n", "LDX.ALL", instr_nib[1]); }
+                    if (debug_mode) { printf("%-10s V0 -> V%01x, I\n", "LDX.ALL", instr_nib[1]); }
 
                     // Read registers V0 through Vx from memory starting at location I.
                     // The interpreter reads values from memory starting at location I into registers V0 through Vx.

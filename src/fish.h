@@ -50,13 +50,13 @@ typedef struct {
     uint8_t keypad[16];
 
     // CPU exectution speed (instructions per second to execute).
-    uint8_t frequency;
+    uint16_t frequency;
 
     // Kill option
     uint8_t exit_requested;
 
-    // Request redraw
-    uint8_t request_draw;
+    // Keeps track keypad state on previous frame.
+    uint8_t keypad_buffer[16];
 } Fish;
 
 void InitFish(Fish* state);
