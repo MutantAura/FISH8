@@ -143,52 +143,51 @@ void EmulateCpu(Fish* device) {
                     if (debug_mode) { printf("%-10s V%01x,V%01x\n", "ADD", instr_nib[1], instr_nib[2]); }
 
                     // Set Vx = Vx + Vy, set VF = carry.
-                    //The values of Vx and Vy are added together. If the result is greater than 8 bits (i.e., > 255,) VF is set to 1, otherwise 0. 
+                    // The values of Vx and Vy are added together. If the result is greater than 8 bits (i.e., > 255,) VF is set to 1, otherwise 0. 
                     // Only the lowest 8 bits of the result are kept, and stored in Vx.
                     uint16_t overflow = device->v[instr_nib[1]] + device->v[instr_nib[2]];
-                    device->v[0xF] = overflow > UINT8_MAX;
                     device->v[instr_nib[1]] = (uint8_t)(overflow & 0x00FF);
+                    device->v[0xF] = overflow > UINT8_MAX;
                 } break;
                 case 0x5: {
                     if (debug_mode) { printf("%-10s V%01x,V%01x\n", "SUB", instr_nib[1], instr_nib[2]); }
 
                     // Set Vx = Vx - Vy, set VF = NOT borrow.
                     // If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx, and the results stored in Vx.
-                    device->v[0xF] = device->v[instr_nib[1]] > device->v[instr_nib[2]];
+                    uint8_t tempX = device->v[instr_nib[1]];
                     device->v[instr_nib[1]] -= device->v[instr_nib[2]];
+
+                    device->v[0xF] = tempX >= device->v[instr_nib[2]];
                 } break;
                 case 0x6: {
                     if (debug_mode) { printf("%-10s V%01x,V%01x\n", "SHR", instr_nib[1], instr_nib[2]); }
 
                     // Set Vx = Vx SHR 1.
                     // If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.
-                    if ((device->v[instr_nib[1]] & 0x01) == 1) {
-                        device->v[0xF] = 1;
-                    } else device->v[0xF] = 0;
-
+                    uint8_t tempX = device->v[instr_nib[1]];
                     device->v[instr_nib[1]] >>= 1;
+
+                    device->v[0xF] = tempX & 0x01;
                 } break;
                 case 0x7: {
                     if (debug_mode) { printf("%-10s V%01x,V%01x\n", "SUBN", instr_nib[1], instr_nib[2]); }
 
                     // Set Vx = Vy - Vx, set VF = NOT borrow.
                     // If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted from Vy, and the results stored in Vx.
-                    if (device->v[instr_nib[2]] > device->v[instr_nib[1]]) {
-                        device->v[0xF] = 1;
-                    } else device ->v[0xF] = 0;
-
+                    uint8_t tempX = device->v[instr_nib[1]];
                     device->v[instr_nib[1]] = device->v[instr_nib[2]] - device->v[instr_nib[1]];
+
+                    device->v[0xF] = device->v[instr_nib[2]] >= tempX; 
                 } break;
                 case 0xE: {
                     if (debug_mode) { printf("%-10s V%01x,V%01x (VF)\n", "SHL", instr_nib[1], instr_nib[2]); }
 
                     // Set Vx = Vx SHL 1.
                     // If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
-                    if (((device->v[instr_nib[1]] & 0x80) >> 7) == 1) {
-                        device->v[0xF] = 1;
-                    } else device->v[0xF] = 0;
-
+                    uint8_t tempX = device->v[instr_nib[1]];
                     device->v[instr_nib[1]] <<= 1;
+
+                    device->v[0xF] = (tempX & 0x80) >> 7; 
                 } break;
                 default: puts("Unknown `8` opcode."); break;
             }
