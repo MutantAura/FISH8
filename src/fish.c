@@ -17,6 +17,10 @@ void InputHandler(Fish* fish, SDL_Event* event) {
         return;
     }
 
+    if (keyboard_state[SDL_SCANCODE_ESCAPE]) {
+        fish->exit_requested = 1;
+        return;
+    }
     if (keyboard_state[SDL_SCANCODE_0]) {
             fish->keypad[0x0] = 1;
     } else fish->keypad[0x0] = 0;
@@ -95,6 +99,16 @@ void ClearScreen() {
     SDL_RenderPresent(renderer);
 }
 
+void UpdateTimers(Fish* state) {
+    if (state->delay_timer > 0) {
+        state->delay_timer--;
+    }
+
+    if (state->sound_timer > 0) {
+        state->sound_timer--;
+    }
+}
+
 int main(int argc, char** argv) {
     if (argc != 2) {
         puts("you are stupid.");
@@ -122,7 +136,7 @@ int main(int argc, char** argv) {
         SDL_Event event;
         while (SDL_PollEvent(&event) != 0) {
             InputHandler(&state, &event);
-        } 
+        }
         
         // Assume each cycle = 1 instruction.
         for (int i = 0; i < state.frequency; i++) {
@@ -135,6 +149,8 @@ int main(int argc, char** argv) {
         if (render_cost < (1000/REFRESH_RATE)) {
             SDL_Delay((1000/REFRESH_RATE) - render_cost);
         }
+        
+        UpdateTimers(&state);
     }
 
     // Cleanup

@@ -10,7 +10,7 @@ void EmulateCpu(Fish* device) {
     // Seed RNG
     srand(time(NULL));
 
-    int debug_mode = 0;
+    int debug_mode = 1;
 
     // Extract opcode data and break down into nibbles.
     uint8_t* current_instr = &device->memory[device->pc];
