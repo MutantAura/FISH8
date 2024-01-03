@@ -140,7 +140,7 @@ void EmulateCpu(Fish* device) {
                     device->v[instr_nib[1]] ^= device->v[instr_nib[2]];
                 } break;
                 case 0x4: {
-                    if (debug_mode) { printf("%-10s V%01x,V%01x (VF)\n", "ADD", instr_nib[1], instr_nib[2]); }
+                    if (debug_mode) { printf("%-10s V%01x,V%01x\n", "ADD", instr_nib[1], instr_nib[2]); }
 
                     // Set Vx = Vx + Vy, set VF = carry.
                     //The values of Vx and Vy are added together. If the result is greater than 8 bits (i.e., > 255,) VF is set to 1, otherwise 0. 
@@ -158,7 +158,7 @@ void EmulateCpu(Fish* device) {
                     device->v[instr_nib[1]] -= device->v[instr_nib[2]];
                 } break;
                 case 0x6: {
-                    if (debug_mode) { printf("%-10s V%01x,V%01x (VF)\n", "SHR", instr_nib[1], instr_nib[2]); }
+                    if (debug_mode) { printf("%-10s V%01x,V%01x\n", "SHR", instr_nib[1], instr_nib[2]); }
 
                     // Set Vx = Vx SHR 1.
                     // If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.
@@ -169,7 +169,7 @@ void EmulateCpu(Fish* device) {
                     device->v[instr_nib[1]] >>= 1;
                 } break;
                 case 0x7: {
-                    if (debug_mode) { printf("%-10s V%01x,V%01x (VF)\n", "SUBN", instr_nib[1], instr_nib[2]); }
+                    if (debug_mode) { printf("%-10s V%01x,V%01x\n", "SUBN", instr_nib[1], instr_nib[2]); }
 
                     // Set Vx = Vy - Vx, set VF = NOT borrow.
                     // If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted from Vy, and the results stored in Vx.
@@ -247,6 +247,8 @@ void EmulateCpu(Fish* device) {
                     device->display[y_coord + row][x_coord + col] ^= sprite_bit;
                 }
             }
+
+            device->draw_requested = 1;
         } break;
         case 0xe: {
             switch (current_instr[1]) {

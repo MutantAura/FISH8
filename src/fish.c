@@ -90,6 +90,7 @@ void UpdateRenderer(Fish* state) {
             SDL_RenderFillRect(renderer, &temp);
         }
     }
+    state->draw_requested = 0;
     SDL_RenderPresent(renderer);
 }
 
@@ -139,11 +140,13 @@ int main(int argc, char** argv) {
         }
         
         // Assume each cycle = 1 instruction.
-        for (int i = 0; i < state.frequency; i++) {
+        for (int i = 0; i < (state.frequency/REFRESH_RATE); i++) {
             EmulateCpu(&state);
         }
 
-        UpdateRenderer(&state);
+        if (state.draw_requested) {
+            UpdateRenderer(&state);
+        }
 
         int render_cost = SDL_GetTicks() - last_frame_ticks;
         if (render_cost < (1000/REFRESH_RATE)) {

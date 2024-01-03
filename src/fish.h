@@ -57,6 +57,8 @@ typedef struct {
 
     // Keeps track keypad state on previous frame.
     uint8_t keypad_buffer[16];
+
+    uint8_t draw_requested;
 } Fish;
 
 void InitFish(Fish* state);
