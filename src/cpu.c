@@ -235,6 +235,7 @@ void EmulateCpu(Fish* device) {
             uint8_t x_coord = device->v[instr_nib[1]];
             uint8_t y_coord = device->v[instr_nib[2]];
 
+            device->v[0xF] = 0;
             // Loop over each row from Y -> Y + sprite height.
             for (int row = 0; row < instr_nib[3]; row++) {
                 // Loop over each bit of the row byte (8 bits).
@@ -243,7 +244,7 @@ void EmulateCpu(Fish* device) {
 
                     if (sprite_bit && device->display[y_coord + row][x_coord + col]) {
                         device->v[0xF] = 1;
-                    } else device->v[0xF] = 0;
+                    }
                     device->display[y_coord + row][x_coord + col] ^= sprite_bit;
                 }
             }
