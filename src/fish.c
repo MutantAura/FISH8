@@ -8,7 +8,80 @@
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
+SDL_AudioSpec spec_requested;
+SDL_AudioDeviceID audio_device;
+SDL_Event event;
+
 int last_frame_ticks = 0;
+
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        puts("you are stupid.");
+        return 1;
+    }
+
+    // Setup device
+    Fish state = {0};
+    InitFish(&state);
+
+    if (!InitSDL()) { return 1; }
+
+    // Load ROM file into device memory.
+    if (LoadRom(argv[1], &state.memory[ROM_START]) != 0) {
+        puts("You are also stupid (file error)");
+        return 1;
+    }
+
+    ClearScreen();
+
+    InitAudioDevices();
+
+    // Enter SDL loop?
+    while (!state.exit_requested) {
+        last_frame_ticks = SDL_GetTicks();
+
+        while (SDL_PollEvent(&event) != 0) {
+            InputHandler(&state, &event);
+        }
+        
+        // Assume each cycle = 1 instruction.
+        for (int i = 0; i < (state.frequency/REFRESH_RATE); i++) {
+            EmulateCpu(&state);
+        }
+
+        if (state.draw_requested) {
+            UpdateRenderer(&state);
+        }
+
+        UpdateAudio(state.sound_timer);
+
+        int render_cost = SDL_GetTicks() - last_frame_ticks;
+        if (render_cost < (1000/REFRESH_RATE)) {
+            SDL_Delay((1000/REFRESH_RATE) - render_cost);
+        }
+        
+        UpdateTimers(&state);
+    }
+
+    // Cleanup
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+
+    return 0;
+}
+
+void UpdateAudio(uint8_t timer) {
+    if (timer != 0) {
+
+    }
+}
+
+int InitAudioDevices() {
+    spec_requested.freq = 44100;
+    spec_requested.format = AUDIO_S16SYS;
+    spec_requested.channels = 1;
+}
 
 void InputHandler(Fish* fish, SDL_Event* event) {
     switch (event->type) {
@@ -94,60 +167,6 @@ void UpdateTimers(Fish* state) {
     if (state->sound_timer > 0) {
         state->sound_timer--;
     }
-}
-
-int main(int argc, char** argv) {
-    if (argc != 2) {
-        puts("you are stupid.");
-        return 1;
-    }
-
-    // Setup device
-    Fish state = {0};
-    InitFish(&state);
-
-    if (!InitSDL()) { return 1; }
-
-    // Load ROM file into device memory.
-    if (LoadRom(argv[1], &state.memory[ROM_START]) != 0) {
-        puts("You are also stupid (file error)");
-        return 1;
-    }
-
-    ClearScreen();
-
-    // Enter SDL loop?
-    while (!state.exit_requested) {
-        last_frame_ticks = SDL_GetTicks();
-
-        SDL_Event event;
-        while (SDL_PollEvent(&event) != 0) {
-            InputHandler(&state, &event);
-        }
-        
-        // Assume each cycle = 1 instruction.
-        for (int i = 0; i < (state.frequency/REFRESH_RATE); i++) {
-            EmulateCpu(&state);
-        }
-
-        if (state.draw_requested) {
-            UpdateRenderer(&state);
-        }
-
-        int render_cost = SDL_GetTicks() - last_frame_ticks;
-        if (render_cost < (1000/REFRESH_RATE)) {
-            SDL_Delay((1000/REFRESH_RATE) - render_cost);
-        }
-        
-        UpdateTimers(&state);
-    }
-
-    // Cleanup
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-
-    return 0;
 }
 
 void InitFish(Fish* state) {

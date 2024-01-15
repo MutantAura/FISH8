@@ -61,11 +61,12 @@ typedef struct {
     uint8_t draw_requested;
 } Fish;
 
-void InitFish(Fish* state);
-
+void InitFish();
+void InputHandler();
+void UpdateRenderer();
+void UpdateTimers();
 int InitSDL();
 void ClearScreen();
-
-int LoadRom(char* file_name, uint8_t* memory);
+int LoadRom();
 
 #endif // FISH_H
