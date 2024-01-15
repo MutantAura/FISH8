@@ -53,8 +53,6 @@ int main(int argc, char** argv) {
             UpdateRenderer(&state);
         }
 
-        UpdateAudio(state.sound_timer);
-
         int render_cost = SDL_GetTicks() - last_frame_ticks;
         if (render_cost < (1000/REFRESH_RATE)) {
             SDL_Delay((1000/REFRESH_RATE) - render_cost);
@@ -71,13 +69,7 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-void UpdateAudio(uint8_t timer) {
-    if (timer != 0) {
-
-    }
-}
-
-int InitAudioDevices() {
+void InitAudioDevices() {
     spec_requested.freq = 44100;
     spec_requested.format = AUDIO_S16SYS;
     spec_requested.channels = 1;

@@ -65,6 +65,7 @@ void InitFish();
 void InputHandler();
 void UpdateRenderer();
 void UpdateTimers();
+void InitAudioDevices();
 int InitSDL();
 void ClearScreen();
 int LoadRom();
