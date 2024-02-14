@@ -25,5 +25,5 @@ jobs:
         name: "FISH8"
         artifacts: "./fish8.tar.gz"
         replacesArtifacts: true
-        tags: release
+        tag: release
         token: ${{secrets.GITHUB_TOKEN}}
