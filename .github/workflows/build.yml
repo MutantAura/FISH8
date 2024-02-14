@@ -8,10 +8,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+
     - name: Install dependencies
-      run: |
-        sudo apt-get install -y libsdl2-dev
+      run: sudo apt-get install -y libsdl2-dev
+
     - name: Run make
-      run: |
-        make
+      run: make release
+
+    - name: Push Release
+      uses: ncipollo/release-action@v1
+      with:
+        name: "FISH8"
+        artifacts: "./fish8.tar.gz"
+        replacesArtifacts: true
+        token: ${{secrets.GITHUB_TOKEN}}
