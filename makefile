@@ -8,6 +8,10 @@ all:
 
 	gcc src/fish.c src/cpu.c -o build/fish8 $(CFLAGS) `pkg-config --cflags --libs sdl2`
 
+release:
+	make clean
+	tar -czvf fish8.tar.gz build/
+
 clean:
 	rm -rf build/
 	make all
