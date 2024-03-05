@@ -14,7 +14,6 @@ CHIP-8 interpreter in C/SDL2.
 ![image](https://github.com/MutantAura/FISH8/assets/44103205/5a6b0362-c72d-4d6d-87cc-dbc474d9f9df)
 
 ## TODO:
-- Audio
 - Better delay?
 - Configuration arguments
 - Better keypad handling
