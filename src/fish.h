@@ -1,13 +1,20 @@
-#include <stdint.h>
-
 #ifndef FISH_H_
 #define FISH_H_
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <math.h>
+#include <SDL2/SDL.h>
 
 // System constants
 #define MAX_MEMORY 4096
 #define STACK_SIZE 16
 #define DISPLAY_WIDTH 64
 #define DISPLAY_HEIGHT 32
+
+#define AUDIO_FREQUENCY 48000
+#define TAU 6.2831855
 
 #define REFRESH_RATE 60
 #define DISPLAY_SCALE 20
@@ -61,13 +68,16 @@ typedef struct {
     uint8_t draw_requested;
 } Fish;
 
-void InitFish();
-void InputHandler();
-void UpdateRenderer();
-void UpdateTimers();
-void InitAudioDevices();
+void InitFish(Fish*);
+void InputHandler(Fish*, SDL_Event*);
+void UpdateRenderer(Fish*);
+void UpdateTimers(Fish*, SDL_AudioDeviceID);
 int InitSDL();
 void ClearScreen();
-int LoadRom();
+int LoadRom(char*, uint8_t*);
+double apply_volume(double, double);
+double gen_sine(double, int);
+double gen_square(double, int);
+void play_buffer(void*, uint8_t*, int);
 
 #endif // FISH_H

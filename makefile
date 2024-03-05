@@ -6,7 +6,7 @@ all:
 		mkdir build ; \
 	fi
 
-	gcc src/fish.c src/cpu.c -o build/fish8 $(CFLAGS) `pkg-config --cflags --libs sdl2`
+	gcc src/fish.c src/cpu.c -o build/fish8 -lm $(CFLAGS) `pkg-config --cflags --libs sdl2`
 
 release:
 	make clean

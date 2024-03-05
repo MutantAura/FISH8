@@ -1,16 +1,21 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <SDL2/SDL.h>
-
 #include "fish.h"
 #include "cpu.h"
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
-SDL_AudioSpec spec_requested;
-SDL_AudioDeviceID audio_device;
 SDL_Event event;
+
+SDL_AudioSpec spec = {
+    .freq = AUDIO_FREQUENCY,
+    .format = AUDIO_S16SYS,
+    .channels = 1,
+    .samples = 4096,
+    .callback = play_buffer,
+    .userdata = NULL
+};
+
+uint16_t audio_buffer[AUDIO_FREQUENCY];
+int buffer_position = 0;
 
 int last_frame_ticks = 0;
 
@@ -34,7 +39,11 @@ int main(int argc, char** argv) {
 
     ClearScreen();
 
-    InitAudioDevices();
+    SDL_AudioDeviceID audio_device = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
+
+    for (int i = 0; i < AUDIO_FREQUENCY; i++) {
+        audio_buffer[i] = apply_volume(gen_square(440, i), 0.5);
+    }
 
     // Enter SDL loop?
     while (!state.exit_requested) {
@@ -58,21 +67,20 @@ int main(int argc, char** argv) {
             SDL_Delay((1000/REFRESH_RATE) - render_cost);
         }
         
-        UpdateTimers(&state);
+        UpdateTimers(&state, audio_device);
+
+        if (buffer_position >= AUDIO_FREQUENCY) {
+            buffer_position = 0;
+        }
     }
 
     // Cleanup
+    SDL_CloseAudioDevice(audio_device);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
 
     return 0;
-}
-
-void InitAudioDevices() {
-    spec_requested.freq = 44100;
-    spec_requested.format = AUDIO_S16SYS;
-    spec_requested.channels = 1;
 }
 
 void InputHandler(Fish* fish, SDL_Event* event) {
@@ -151,14 +159,15 @@ void ClearScreen() {
     SDL_RenderPresent(renderer);
 }
 
-void UpdateTimers(Fish* state) {
+void UpdateTimers(Fish* state, SDL_AudioDeviceID id) {
     if (state->delay_timer > 0) {
         state->delay_timer--;
     }
 
     if (state->sound_timer > 0) {
+        SDL_PauseAudioDevice(id, 0);
         state->sound_timer--;
-    }
+    } else SDL_PauseAudioDevice(id, 1);
 }
 
 void InitFish(Fish* state) {
@@ -233,4 +242,35 @@ int InitSDL() {
     last_frame_ticks = SDL_GetTicks();
 
     return 1;
+}
+
+double apply_volume(double input, double amp) {
+    return input * INT16_MAX * amp;
+}
+
+double gen_sine(double freq, int time) {
+    return sin((freq * time * TAU) / AUDIO_FREQUENCY);
+}
+
+double gen_square(double freq, int time) {
+    double raw_sine = gen_sine(freq, time);
+    return raw_sine > 0.0 ? 1.0 : -1.0; 
+}
+
+void play_buffer(void* userdata, uint8_t* stream, int len) {
+    if (userdata == NULL) {
+        // IGNORE WARNING
+    }
+
+    SDL_memset(stream, spec.silence, len);
+
+    len /= 2;
+
+    len = (buffer_position + len < AUDIO_FREQUENCY ? len : AUDIO_FREQUENCY - buffer_position);
+
+    if (!len) return;
+
+    SDL_memcpy(stream, audio_buffer + buffer_position, len*2);
+
+    buffer_position += len;
 }
