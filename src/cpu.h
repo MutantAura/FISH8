@@ -3,6 +3,6 @@
 #ifndef CPU_H
 #define CPU_H
 
-void EmulateCpu(Fish* device);
+void EmulateCpu(Fish*, int);
 
 #endif // CPU_H

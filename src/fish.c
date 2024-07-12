@@ -19,15 +19,41 @@ int buffer_position = 0;
 
 int last_frame_ticks = 0;
 
+ConfigState CreateConfiguration(const int count, char** args) {
+    ConfigState config = {0};
+
+    for (int i = 0; i < count; i++) {
+        // Evaluate every item in args[]
+        int char_count = strlen(args[i]);
+
+        int current_char = 0;
+        while (args[i][current_char] != '\0' && current_char < char_count) {
+            if (args[i][current_char] == '-') {
+                switch (args[i][current_char + 1]) {
+                    case 'd': config.debugMode = 1; break;
+                    case 'f': config.deviceFreqency = 1000; break;
+                    case 'r': config.deviceRefresh = 120; break;
+                }
+            }
+            current_char++;
+        }
+    }
+
+    return config;
+}
+
+
 int main(int argc, char** argv) {
-    if (argc != 2) {
+    if (argc < 2) {
         puts("you are stupid.");
         return 1;
     }
 
+    ConfigState configState = CreateConfiguration(argc, argv);
+
     // Setup device
     Fish state = {0};
-    InitFish(&state);
+    InitFish(&state, &configState);
 
     if (!InitSDL()) { return 1; }
 
@@ -52,10 +78,10 @@ int main(int argc, char** argv) {
         while (SDL_PollEvent(&event) != 0) {
             InputHandler(&state, &event);
         }
-        
+
         // Assume each cycle = 1 instruction.
         for (int i = 0; i < (state.frequency/REFRESH_RATE); i++) {
-            EmulateCpu(&state);
+            EmulateCpu(&state, configState.debugMode);
         }
 
         if (state.draw_requested) {
@@ -66,7 +92,7 @@ int main(int argc, char** argv) {
         if (render_cost < (1000/REFRESH_RATE)) {
             SDL_Delay((1000/REFRESH_RATE) - render_cost);
         }
-        
+
         UpdateTimers(&state, audio_device);
 
         if (buffer_position >= AUDIO_FREQUENCY) {
@@ -144,7 +170,7 @@ void UpdateRenderer(Fish* state) {
             temp.y = i * DISPLAY_SCALE;
             temp.w = DISPLAY_SCALE;
             temp.h = DISPLAY_SCALE;
-                
+
             SDL_SetRenderDrawColor(renderer, display_bit, display_bit, display_bit, 0xFF);
             SDL_RenderFillRect(renderer, &temp);
         }
@@ -170,11 +196,15 @@ void UpdateTimers(Fish* state, SDL_AudioDeviceID id) {
     } else SDL_PauseAudioDevice(id, 1);
 }
 
-void InitFish(Fish* state) {
+void InitFish(Fish* state, ConfigState* config) {
     memset(state->display, 0, sizeof(state->display));
     state->pc = ROM_START;
     state->sp = 0;
-    state->frequency = 500;
+
+    if (config->deviceFreqency != 0) {
+        state->frequency = config->deviceFreqency;
+    } else state->frequency = 500;
+
     state->exit_requested = 0;
 
     uint8_t font_array[] = {

@@ -25,6 +25,12 @@
 #define ROM_START 0x0200
 
 typedef struct {
+    int debugMode;
+    int deviceFreqency;
+    int deviceRefresh;
+} ConfigState;
+
+typedef struct {
     // 4Kb of main system memory organised in a byte array.
     uint8_t memory[MAX_MEMORY];
 
@@ -68,7 +74,7 @@ typedef struct {
     uint8_t draw_requested;
 } Fish;
 
-void InitFish(Fish*);
+void InitFish(Fish*, ConfigState*);
 void InputHandler(Fish*, SDL_Event*);
 void UpdateRenderer(Fish*);
 void UpdateTimers(Fish*, SDL_AudioDeviceID);
